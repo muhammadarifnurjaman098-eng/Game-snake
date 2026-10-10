@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login dan Snake</title>
+<meta name="description" content="Halaman login bertema hitam biru dengan game snake.">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  margin: 0;
+  color: white;
+  background-color: #000;
+  background-image:
+    linear-gradient(rgba(30, 144, 255, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 144, 255, 0.25) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gerak 4s linear infinite;
+}
+
+@keyframes gerak {
+  from { background-position: 0 0; }
+  to   { background-position: 40px 40px; }
+}
+
+h1 {
+  letter-spacing: 3px;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(30, 144, 255, 0.8);
+}
+
+.kotak {
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  padding: 28px;
+  background: rgba(25, 25, 25, 0.8);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(30, 144, 255, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(30, 144, 255, 0.25),
+              0 8px 20px rgba(0, 0, 0, 0.7);
+  animation: muncul 0.8s ease;
+}
+
+@keyframes muncul {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+input {
+  background: transparent !important;
+  color: white !important;
+  border: none !important;
+  border-bottom: 2px solid #1e90ff !important;
+  border-radius: 0;
+  outline: none;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-bottom: 2px solid #4db3ff !important;
+  background: rgba(30, 144, 255, 0.1) !important;
+  box-shadow: 0 6px 10px -6px rgba(30, 144, 255, 0.8);
+}
+
+input::placeholder {
+  color: #999;
+}
+
+button {
+  display: block;
+  margin: 30px auto 0;
+  width: 70%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #00c853 0%, #00c853 60%, #0a2e12 100%);
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.35);
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 200, 83, 0.6);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.tautan {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.tautan span {
+  color: #1e90ff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.pesan {
+  min-height: 20px;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pesan.salah { color: #ff5252; }
+.pesan.ok    { color: #00e676; }
+
+.tengah {
+  text-align: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  margin: 20px auto;
+  border: 5px solid rgba(30, 144, 255, 0.25);
+  border-top-color: #1e90ff;
+  border-radius: 50%;
+  animation: putar 0.9s linear infinite;
+}
+
+@keyframes putar {
+  to { transform: rotate(360deg); }
+}
+
+.btn-keluar {
+  background: linear-gradient(135deg, #e53935 0%, #e53935 60%, #3b0a0a 100%);
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.35);
+}
+
+.lebar {
+  max-width: 360px;
+}
+
+#papan {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 10px auto;
+  background: #0b0b0b;
+  border: 2px solid #1e90ff;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(30, 144, 255, 0.4);
+  touch-action: none;
+}
+
+.skor {
+  margin: 4px 0;
+  font-size: 15px;
+  color: #ccc;
+}
+
+.skor b {
+  color: #00e676;
+}
+
+.petunjuk {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.arah {
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  padding: 0;
+  font-size: 22px;
+  border-radius: 14px;
+  background: rgba(30, 144, 255, 0.2);
+  border: 1px solid rgba(30, 144, 255, 0.5);
+  box-shadow: none;
+}
+
+.atas  { grid-column: 2; grid-row: 1; }
+.kiri  { grid-column: 1; grid-row: 2; }
+.bawah { grid-column: 2; grid-row: 2; }
+.kanan { grid-column: 3; grid-row: 2; }
+
+.kecil {
+  margin-top: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>HALAMAN LOGIN</h1>
+
+<form class="kotak" id="formLogin" onsubmit="return false;">
+  <div class="form-group">
+    <label for="nama">username:</label>
+    <input type="text" id="nama" placeholder="masukkan username" autocomplete="off">
+  </div>
+
+  <div class="form-group">
+    <label for="password">password:</label>
+    <input type="password" id="password" placeholder="masukkan password">
+  </div>
+
+  <p class="pesan" id="pesanLogin"></p>
+  <button type="submit" id="btnLogin">kirim</button>
+  <p class="tautan">Belum punya akun? <span id="keDaftar">Daftar</span></p>
+</form>
+
+<form class="kotak" id="formDaftar" style="display:none" onsubmit="return false;">
+  <div class="form-group">
+    <label for="namaBaru">username baru:</label>
+    <input type="text" id="namaBaru" placeholder="buat username" autocomplete="off">
+  </div>
+
+  <div class="form-group">
+    <label for="passwordBaru">password baru:</label>
+    <input type="password" id="passwordBaru" placeholder="buat password">
+  </div>
+
+  <p class="pesan" id="pesanDaftar"></p>
+  <button type="submit" id="btnDaftar">daftar</button>
+  <p class="tautan">Sudah punya akun? <span id="keLogin">Login</span></p>
+</form>
+
+<script>
+window.onerror = function (pesan) {
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    "<p style='color:#ff5252;padding:10px'>Error JS: " + pesan + "</p>"
+  );
+};
+
+function mulai() {
+  const formLogin = document.getElementById("formLogin");
+  const formDaftar = document.getElementById("formDaftar");
+
+  if (!formLogin || !formDaftar) {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      "<p style='color:#ff5252'>Form login/daftar tidak ditemukan.</p>"
+    );
+    return;
+  }
+
+  const pesanLogin = document.getElementById("pesanLogin");
+  const pesanDaftar = document.getElementById("pesanDaftar");
+
+  // Daftar akun (bawaan: admin / 1234)
+  let akun = { admin: "1234" };
+  try {
+    const tersimpan = JSON.parse(localStorage.getItem("akun"));
+    if (tersimpan && typeof tersimpan === "object") akun = tersimpan;
+  } catch (e) {}
+
+  function simpanAkun() {
+    try {
+      localStorage.setItem("akun", JSON.stringify(akun));
+    } catch (e) {}
+  }
+
+  function adaAkun(nama) {
+    return Object.prototype.hasOwnProperty.call(akun, nama);
+  }
+
+  function tampil(el, teks, berhasil) {
+    el.textContent = teks;
+    el.className = "pesan " + (berhasil ? "ok" : "salah");
+  }
+
+  // ===== GAME SNAKE =====
+  function bukaGame(nama, kotak) {
+    const N = 15;
+    const S = 20;
+
+    kotak.className = "kotak tengah lebar";
+    kotak.innerHTML =
+      '<h2>Halo, <span id="namaUser"></span>! 🐍</h2>' +
+      '<p class="skor">Skor: <b id="skor">0</b> &nbsp;|&nbsp; Rekor: <b id="rekor">0</b></p>' +
+      '<canvas id="papan" width="300" height="300"></canvas>' +
+      '<p class="petunjuk">Geser jari di papan atau pakai tombol panah</p>' +
+      '<div class="dpad">' +
+      '<button type="button" class="arah atas" data-x="0" data-y="-1">▲</button>' +
+      '<button type="button" class="arah kiri" data-x="-1" data-y="0">◀</button>' +
+      '<button type="button" class="arah bawah" data-x="0" data-y="1">▼</button>' +
+      '<button type="button" class="arah kanan" data-x="1" data-y="0">▶</button>' +
+      '</div>' +
+      '<button type="button" class="kecil" id="btnMulai">mulai</button>' +
+      '<button type="button" class="btn-keluar kecil" id="btnKeluar">keluar</button>';
+
+    document.getElementById("namaUser").textContent = nama;
+
+    const kanvas = document.getElementById("papan");
+    const g = kanvas.getContext("2d");
+    const elSkor = document.getElementById("skor");
+    const elRekor = document.getElementById("rekor");
+    const btnMulai = document.getElementById("btnMulai");
+    const kunciRekor = "rekor_" + nama;
+
+    let ular, arah, arahBaru, makanan, skor, rekor, timer;
+    let berjalan = false;
+
+    rekor = 0;
+    try {
+      rekor = parseInt(localStorage.getItem(kunciRekor), 10) || 0;
+    } catch (e) {}
+    elRekor.textContent = rekor;
+
+    function acakMakanan() {
+      if (ular.length >= N * N) return false;
+      let x, y;
+      do {
+        x = Math.floor(Math.random() * N);
+        y = Math.floor(Math.random() * N);
+      } while (ular.some(function (s) { return s.x === x && s.y === y; }));
+      makanan = { x: x, y: y };
+      return true;
+    }
+
+    function reset() {
+      ular = [{ x: 7, y: 7 }, { x: 6, y: 7 }, { x: 5, y: 7 }];
+      arah = { x: 1, y: 0 };
+      arahBaru = arah;
+      skor = 0;
+      elSkor.textContent = 0;
+      acakMakanan();
+    }
+
+    function kecepatan() {
+      return Math.max(70, 140 - Math.floor(skor / 30) * 10);
+    }
+
+    function atur() {
+      clearInterval(timer);
+      timer = setInterval(langkah, kecepatan());
+    }
+
+    function gambar(pesan) {
+      g.fillStyle = "#0b0b0b";
+      g.fillRect(0, 0, N * S, N * S);
+
+      g.strokeStyle = "rgba(30,144,255,0.08)";
+      for (let i = 1; i < N; i++) {
+        g.beginPath();
+        g.moveTo(i * S, 0); g.lineTo(i * S, N * S);
+        g.moveTo(0, i * S); g.lineTo(N * S, i * S);
+        g.stroke();
+      }
+
+      g.fillStyle = "#ff5252";
+      g.beginPath();
+      g.arc(makanan.x * S + S / 2, makanan.y * S + S / 2, S / 2 - 3, 0, Math.PI * 2);
+      g.fill();
+
+      ular.forEach(function (s, i) {
+        g.fillStyle = i === 0 ? "#69f0ae" : "#00c853";
+        g.fillRect(s.x * S + 1, s.y * S + 1, S - 2, S - 2);
+      });
+
+      if (pesan) {
+        g.fillStyle = "rgba(0,0,0,0.65)";
+        g.fillRect(0, 0, N * S, N * S);
+        g.fillStyle = "#fff";
+        g.textAlign = "center";
+        g.font = "bold 26px Arial";
+        g.fillText(pesan, N * S / 2, N * S / 2 - 6);
+        g.font = "14px Arial";
+        g.fillText("Tekan tombol di bawah", N * S / 2, N * S / 2 + 20);
+      }
+    }
+
+    function akhiri(menang) {
+      clearInterval(timer);
+      berjalan = false;
+      if (skor > rekor) {
+        rekor = skor;
+        elRekor.textContent = rekor;
+        try {
+          localStorage.setItem(kunciRekor, String(rekor));
+        } catch (e) {}
+      }
+      btnMulai.textContent = "main lagi";
+      gambar(menang ? "MENANG! 🎉" : "GAME OVER");
+    }
+
+    function langkah() {
+      arah = arahBaru;
+      const kepala = { x: ular[0].x + arah.x, y: ular[0].y + arah.y };
+
+      const kenaDinding =
+        kepala.x < 0 || kepala.y < 0 || kepala.x >= N || kepala.y >= N;
+      const kenaBadan = ular.some(function (s, i) {
+        return i < ular.length - 1 && s.x === kepala.x && s.y === kepala.y;
+      });
+
+      if (kenaDinding || kenaBadan) {
+        akhiri(false);
+        return;
+      }
+
+      ular.unshift(kepala);
+
+      if (kepala.x === makanan.x && kepala.y === makanan.y) {
+        skor += 10;
+        elSkor.textContent = skor;
+        if (!acakMakanan()) {
+          akhiri(true);
+          return;
+        }
+        atur();
+      } else {
+        ular.pop();
+      }
+
+      gambar();
+    }
+
+    function mulaiGame() {
+      reset();
+      berjalan = true;
+      btnMulai.textContent = "ulang";
+      atur();
+      gambar();
+    }
+
+    function belok(dx, dy) {
+      if (dx === -arah.x && dy === -arah.y) return;
+      arahBaru = { x: dx, y: dy };
+      if (!berjalan) mulaiGame();
+    }
+
+    const peta = {
+      ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+      w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]
+    };
+
+    function tekanTombol(e) {
+      const p = peta[e.key] || peta[String(e.key).toLowerCase()];
+      if (p) {
+        e.preventDefault();
+        belok(p[0], p[1]);
+      }
+    }
+    document.addEventListener("keydown", tekanTombol);
+
+    kotak.querySelectorAll(".arah").forEach(function (b) {
+      b.addEventListener("pointerdown", function (e) {
+        e.preventDefault();
+        belok(Number(b.dataset.x), Number(b.dataset.y));
+      });
+    });
+
+    let sx = 0, sy = 0;
+    kanvas.addEventListener("touchstart", function (e) {
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    }, { passive: true });
+
+    kanvas.addEventListener("touchend", function (e) {
+      const dx = e.changedTouches[0].clientX - sx;
+      const dy = e.changedTouches[0].clientY - sy;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+      if (Math.abs(dx) > Math.abs(dy)) belok(dx > 0 ? 1 : -1, 0);
+      else belok(0, dy > 0 ? 1 : -1);
+    }, { passive: true });
+
+    btnMulai.addEventListener("click", mulaiGame);
+
+    document.getElementById("btnKeluar").addEventListener("click", function () {
+      clearInterval(timer);
+      document.removeEventListener("keydown", tekanTombol);
+      kotak.remove();
+      document.getElementById("nama").value = "";
+      document.getElementById("password").value = "";
+      pesanLogin.textContent = "";
+      formLogin.style.display = "block";
+    });
+
+    reset();
+    gambar("SNAKE 🐍");
+  }
+
+  // Setelah login berhasil: loading, lalu game
+  function masukDashboard(nama) {
+    formLogin.style.display = "none";
+
+    const kotak = document.createElement("div");
+    kotak.className = "kotak tengah";
+    kotak.innerHTML = '<div class="spinner"></div><p>Memuat akun...</p>';
+    formDaftar.insertAdjacentElement("afterend", kotak);
+
+    setTimeout(function () {
+      bukaGame(nama, kotak);
+    }, 1500);
+  }
+
+  // Pindah antar form
+  document.getElementById("keDaftar").addEventListener("click", function () {
+    formLogin.style.display = "none";
+    formDaftar.style.display = "block";
+    tampil(pesanDaftar, "", true);
+  });
+
+  document.getElementById("keLogin").addEventListener("click", function () {
+    formDaftar.style.display = "none";
+    formLogin.style.display = "block";
+  });
+
+  // LOGIN
+  document.getElementById("btnLogin").addEventListener("click", function () {
+    const nama = document.getElementById("nama").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (nama === "" || password === "") {
+      tampil(pesanLogin, "Username dan password harus diisi!", false);
+      return;
+    }
+
+    if (adaAkun(nama) && akun[nama] === password) {
+      masukDashboard(nama);
+    } else {
+      tampil(pesanLogin, "Username atau password salah!", false);
+      document.getElementById("password").value = "";
+    }
+  });
+
+  // DAFTAR
+  document.getElementById("btnDaftar").addEventListener("click", function () {
+    const namaBaru = document.getElementById("namaBaru").value.trim();
+    const passwordBaru = document.getElementById("passwordBaru").value;
+
+    if (namaBaru === "" || passwordBaru === "") {
+      tampil(pesanDaftar, "Username dan password baru harus diisi!", false);
+      return;
+    }
+
+    if (passwordBaru.length < 4) {
+      tampil(pesanDaftar, "Password minimal 4 karakter!", false);
+      return;
+    }
+
+    if (adaAkun(namaBaru)) {
+      tampil(pesanDaftar, "Username sudah dipakai, pilih yang lain!", false);
+      return;
+    }
+
+    akun[namaBaru] = passwordBaru;
+    simpanAkun();
+
+    formDaftar.reset();
+    formDaftar.style.display = "none";
+    formLogin.style.display = "block";
+    document.getElementById("nama").value = namaBaru;
+    document.getElementById("password").value = "";
+    tampil(pesanLogin, "Akun berhasil dibuat! Silakan login.", true);
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mulai);
+} else {
+  mulai();
+}
+</script>
+
+</body>
+  </html>
